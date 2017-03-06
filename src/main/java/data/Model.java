@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import objects.User;
+import objects.Message;
 
 /**
  *
@@ -174,10 +175,52 @@ public class Model {
         logger.log(Level.INFO, "UPDATE SQL=" + sqlQuery.toString());
         return st.execute(sqlQuery.toString());
     }
-    
-    public void newMessage(User usr) throws SQLException
+    public boolean updateMessage(Message message) throws SQLException
     {
-        //String sqlInsert="insert into messages ("
+        StringBuilder sqlQuery = new StringBuilder();
+        sqlQuery.append("update messages ");
+        sqlQuery.append("set message = '" + message.getMessage() + "', ");
+        sqlQuery.append("userid=" + message.getUserId() + " ");
+        sqlQuery.append("where messageid = " + message.getMessageId() + ";");
+        Statement st = createStatement();
+        logger.log(Level.INFO, "UPDATE SQL=" + sqlQuery.toString());
+        return st.execute(sqlQuery.toString());
+    }
+    public int newMessage(Message msg) throws SQLException
+    {
+        String sqlInsert="insert into messages (userid, message, dateadded) values (" + msg.getUserId() + ", '" + msg.getMessage() + "', now());";
+        Statement s = createStatement();
+        s.execute(sqlInsert, Statement.RETURN_GENERATED_KEYS);
+        ResultSet rs = s.getGeneratedKeys();
+        int messageid = -1;
+        while (rs.next())
+            messageid = rs.getInt(1);   // assuming 3rd column is userid
+        logger.log(Level.INFO, "The new message id=" + messageid);
+        return messageid;
+    }
+    public void deleteMessage(int msgId) throws SQLException
+    {
+        String sqlDelete = "delete from messages where messageid=?";
+        PreparedStatement pst = createPreparedStatement(sqlDelete);
+        pst.setInt(1, msgId);
+        pst.execute();
+    }
+    public Message[] getMessages() throws SQLException
+    {
+         LinkedList<Message> ll = new LinkedList<Message>();
+        String sqlQuery ="select * from messages;";
+        Statement st = createStatement();
+        ResultSet rows = st.executeQuery(sqlQuery);
+        while (rows.next())
+        {
+            logger.log(Level.INFO, "Reading row...");
+            Message usr = new Message();
+            usr.setMessage(rows.getString("message"));
+            usr.setMessageId(rows.getInt("messageid"));
+            usr.setUserId(rows.getInt("userid"));
+            logger.log(Level.INFO, "Adding user to list with id=" + usr.getUserId());
+            ll.add(usr);
+        }
+        return ll.toArray(new Message[ll.size()]);
     }
 }
-
