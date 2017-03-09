@@ -272,6 +272,13 @@
       }
     }    
   </script>
+    <script>
+        function myFunction() {
+            var m  = document.getElementById("message-data").submit();
+            document.getElementById("sent").innerHTML = m;
+
+        }
+    </script>
   </head>
   <body  onload="">
    <div id="title">
@@ -320,10 +327,13 @@
            </tr>
        <td><input type="text" id ="message" size ="10"/></td>
        <tr>
-            <input type="button" value="submit" onclick="" id="get-data"/>
+            <input type="button" value="submit" onclick="myFunction()" id="message-data"/>
        </tr>
        </thead>
        
    </table>
+   <p id ="sent">
+       
+   </p>
   </body>
 </html>
